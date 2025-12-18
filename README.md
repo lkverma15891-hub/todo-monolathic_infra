@@ -1,113 +1,66 @@
-trigger: 
-- feature/*
-- main
 
-pool:
-  name: Prod_infra
 
-variables:
-- name: abc
-  workDir: $(System.DefaultWorkingDirectory)/Env/${{parameter.envrionment}}
+# todo-monolathic_infra
 
-parameters:
-- name: envrionment
-  type: string
-  default: dev
-  values:
-   - dev
-   - prod
+## 📌 Project Overview
+This repository contains **Terraform Infrastructure as Code (IaC)** for provisioning
+Azure infrastructure for a **Todo Monolithic Application**.
 
-stages:
-- stage: Build
-  displayName: Build
-  jobs: 
-  - job: TerraformInitFmtValidate
-    displayName: Terraform Init, Fmt, Validate Job
-    steps: 
-    - task: CmdLine@2
-      inputs:
-        script: 'echo Hello world'
-        
-  - job: TerraformInitPlan
-    displayName: Terraform Init and Plan Job
-    steps: 
-    - task: TerraformInstaller@1
-      inputs:
-        terraformVersion: 'latest'
+This project demonstrates real-world DevOps practices including:
+- Modular Terraform design
+- Azure infrastructure provisioning
+- CI/CD pipeline integration
+- Infrastructure cost awareness
 
-    - task: TerraformTask@5
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
-        workingDirectory: $(workDir)
-        backendServiceArm: 'miro-app'
-        backendAzureRmStorageAccountName: 'lovedevstorage01'
-        backendAzureRmContainerName: 'tfstates'
-        backendAzureRmKey: 'dev.terraform.tfstate'
+---
 
-    - task: TerraformTask@5
-      inputs:
-        provider: 'azurerm'
-        command: 'plan'
-        workingDirectory: $(workDir)
-        environmentServiceNameAzureRM: 'miro-app'
+## 🏗️ Azure Resources Used
+- Resource Group
+- Azure Kubernetes Service (AKS)
+- Storage Account
+- Public IP
+- Modular Terraform components
 
-- stage: Scanning
-  displayName: Scanning
-  jobs: 
-  - job: TFSecScanningJob
-    displayName: TFSEC Scanning Wala Job
-    pool: Prod_infra
-    steps:
-    - task: tfsec@1
-      inputs:
-        version: 'v1.26.0'
-        dir: $(workDir)
+---
 
-  - job: TfLintScanningJob
-    displayName: TFLINT Scanning Wala Job
-    pool: Prod_infra
-    steps:
-    - task: CmdLine@2
-      inputs:
-        script: 'echo Hello world'
+## 📂 Repository Structure
+todo-monolathic_infra/
+├── Module/
+│ ├── resource_group/
+│ ├── azurerm_kubernetes_cluster/
+│ ├── storage_account/
+│ └── Public_ip/
+├── environment/
+├── pipeline.yaml
+├── .gitignore
+└── README.md
 
-- stage: Deploy
-  displayName: Deploy
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-  jobs: 
-  - job: ManualValidation
-    displayName: Manual Validation kardo Please
-    pool: server
-    steps:
-    - task: ManualValidation@1
-      inputs:
-        notifyUsers: 'loveneesh@erloveneesh15891gmail.onmicrosoft.com'
-        approvers: 'loveneesh@erloveneesh15891gmail.onmicrosoft.com'
-        instructions: 'Plan check '
+yaml
+Copy code
 
-  - job: TerraformApply
-    displayName: Terraform Apply wala Job
-    dependsOn: ManualValidation
-    pool: Prod_infra
-    steps:
-    - task: TerraformInstaller@1
-      inputs:
-        terraformVersion: 'latest'
+---
 
-    - task: TerraformTask@5
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
-        workingDirectory: $(workDir)
-        backendServiceArm: 'miro-app'
-        backendAzureRmStorageAccountName: 'lovedevstorage01'
-        backendAzureRmContainerName: 'tfstates'
-        backendAzureRmKey: 'dev.terraform.tfstate'
+## ⚙️ Prerequisites
+- Azure Subscription
+- Terraform >= 1.5
+- Azure CLI (`az login`)
+- Git
 
-    - task: TerraformTask@5
-      inputs:
-        provider: 'azurerm'
-        command: 'apply'
-        workingDirectory: $(workDir)
-        environmentServiceNameAzureRM: 'miro-app'
+---
+
+## 🚀 Terraform Commands
+Run the following commands to deploy infrastructure:
+
+```bash
+terraform init
+terraform validate
+terraform plan
+terraform apply
+🔄 CI/CD Pipeline
+The pipeline.yaml file provides CI automation for:
+
+Terraform validation
+
+Infrastructure planning
+
+Ready for cost estimation integration
